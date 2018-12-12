@@ -15,9 +15,26 @@ class App extends Component {
       newMovieImage: "",
       newMovieDirector: "",
       newMovieYear: "",
-      onChangeStars: "",
+      newMovieStars: "",
       newMovieLength: "",
-      newMovieMPAA: ""
+      newMovieMPAA: "",
+
+      editMovieId: "",
+      editMovieName: "",
+      editMovieDesc: "",
+      editMovieType: "",
+      editMovieImage: "",
+      editMovieDirector: "",
+      editMovieYear: "",
+      editMovieStars: "",
+      editMovieLength: "",
+      editMovieMPAA: "",
+
+      isEditButtonClick: false,
+
+      currentPage: 1,
+      moviePerPage: 9,
+      accordions: {}
     }
   }
   async componentDidMount() {
@@ -28,6 +45,15 @@ class App extends Component {
       movies: data.movies
     })
   }
+
+  componentWillMount() {
+    document.addEventListener('mousedown', this.onHandleClickOffTarget, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this.onHandleClickOffTarget, false);
+  }
+
 
   post = async (name, desc, type, image, director, year, stars, length, MPAA) => {
     var newBody = {
@@ -43,8 +69,7 @@ class App extends Component {
     };
     await fetch('http://localhost:4000/moviePOST/', {
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       },
       method: "POST",
       body: JSON.stringify(newBody)
@@ -58,53 +83,141 @@ class App extends Component {
     })
   }
 
-  onChangeName = (e) => {
-    this.setState({
-      newMovieName: e.target.value
-    });
+  delete = async (id) => {
+    var newBody = {
+      m_id: id
+    };
+    await fetch('http://localhost:4000/movieDELETE', {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: "DELETE",
+      body: JSON.stringify(newBody)
+    })
+    .then(response => {
+      return response.json();
+    })
+    .then((response) => {
+      const i = this.state.movies.findIndex((movie) => {
+        return movie.m_id === response[0].m_id;
+      })
+      console.log('i', i)
+      if(i !== -1) {
+        this.setState({
+          movies: [
+            ...this.state.movies.slice(0, i),
+            ...this.state.movies.slice(i + 1)
+          ]
+        })
+      }
+      console.log('response',response)
+    })
   }
-  onChangeDesc = (e) => {
-    this.setState({
-      newMovieDesc: e.target.value
-    });
+
+  update = async (m_id, name, desc, type, image, director, year, stars, length_min, MPAA) => {
+    var newBody = {
+      m_id,
+      name,
+      desc,
+      type,
+      image,
+      director,
+      year,
+      stars,
+      length_min,
+      MPAA
+    };
+    await fetch('http://localhost:4000/moviePUT/', {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: "PUT",
+      body: JSON.stringify(newBody)
+    })
+    .then(response => {
+      return response.json();
+    })
+    .then((response) => {
+      console.log('response',response)
+      const i = this.state.movies.findIndex((movie) => {
+        return movie.m_id === response[0].m_id;
+      })
+      this.setState({
+          movies: [
+            ...this.state.movies.slice(0, i),
+            response[0],
+            ...this.state.movies.slice(i + 1)
+          ]
+      });
+    })
   }
-  onChangeType = (e) => {
+
+  onHandleInput = (e) => {
+    const { value, name } = e.target;
     this.setState({
-      newMovieType: e.target.value
-    });
+      [name]: value
+    })
   }
-  onChangeImage = (e) => {
+
+  onHandleClickPage = (e) => {
     this.setState({
-      newMovieImage: e.target.value
-    });
-  }
-  onChangeDirector = (e) => {
-    this.setState({
-      newMovieDirector: e.target.value
-    });
-  }
-  onChangeYear = (e) => {
-    this.setState({
-      newMovieYear: e.target.value
-    });
-  }
-  onChangeStars = (e) => {
-    this.setState({
-      newMovieStars: e.target.value
-    });
-  }
-  onChangeLength = (e) => {
-    this.setState({
-      newMovieLength: e.target.value
-    });
-  }
-  onChangeMPAA = (e) => {
-    this.setState({
-      newMovieMPAA: e.target.value
+        currentPage: Number(e.target.id)
     });
   }
 
-  onHandleSubmit = (e) => {
+  onClickDelete = (e, id) => {
+    e.preventDefault();
+    this.delete(id);
+  }
+
+  onClickEdit = (e, m_id, name, desc, type, image, director, year, stars, length_min, MPAA) => {
+    e.preventDefault();
+    
+    this.setState({
+      isEditButtonClick: true,
+      editMovieId: m_id,
+      editMovieName: name,
+      editMovieDesc: desc,
+      editMovieType: type,
+      editMovieImage: image,
+      editMovieDirector: director,
+      editMovieYear: year,
+      editMovieStars: stars,
+      editMovieLength: length_min,
+      editMovieMPAA: MPAA
+    })
+  }
+
+  onClickSave = (e, m_id, name, desc, type, image, director, year, stars, length_min, MPAA) => {
+    e.preventDefault();
+
+    this.update(m_id, name, desc, type, image, director, year, stars, length_min, MPAA);
+
+    this.setState({
+      isEditButtonClick: false,
+      editMovieId: "",
+      editMovieName: "",
+      editMovieDesc: "",
+      editMovieType: "",
+      editMovieImage: "",
+      editMovieDirector: "",
+      editMovieYear: "",
+      editMovieStars: "",
+      editMovieLength: "",
+      editMovieMPAA: ""
+    })
+  }
+
+  handleAccordionClick = (panelNumber) => {
+    this.setState({
+      accordions: {
+          [panelNumber]: !this.state.accordions[panelNumber]
+      }
+    })
+  }
+
+  onHandleSubmit = (e, history) => {
+    console.log(history)
     e.preventDefault();
     const name = this.state.newMovieName;
     const desc = this.state.newMovieDesc;
@@ -119,6 +232,7 @@ class App extends Component {
 
     this.post(name, desc, type, image, director, year, stars, length, MPAA);
     e.target.reset();
+    history.push("/");
     this.setState({
       newMovieName: "",
       newMovieDesc: "",
@@ -133,6 +247,16 @@ class App extends Component {
    
   }
 
+  onHandleClickOffTarget = (e) => {
+      if (e.target.classList.contains('update')) {
+          return;
+      } else {
+          this.setState({
+              isEditButtonClick: false
+          });
+      }
+  }
+
   render() {
     return (
       <BrowserRouter>
@@ -144,7 +268,10 @@ class App extends Component {
               path="/" 
               render={(props) => 
                 <Category
-                  movies={this.state.movies} /> 
+                  movies={this.state.movies}
+                  onHandleClickPage={this.onHandleClickPage}
+                  onClickDelete={this.onClickDelete}
+                  {...this.state} /> 
               }
           />
           <Route
@@ -153,6 +280,12 @@ class App extends Component {
                 render={(props) =>
                   <Single
                     movies={this.state.movies}
+                    handleAccordionClick={this.handleAccordionClick}
+                    onClickEdit={this.onClickEdit}
+                    onClickSave={this.onClickSave}
+                    onHandleClick={this.onHandleClick}
+                    onHandleInput={this.onHandleInput}
+                    {...this.state}
                     {...props} />
                 }
             />
@@ -160,23 +293,14 @@ class App extends Component {
                 exact 
                 path="/form"
                 render={(props) => 
-                  <Form 
-                    onChangeName={this.onChangeName}
-                    onChangeDesc={this.onChangeDesc}
-                    onChangeType={this.onChangeType}
-                    onChangeImage={this.onChangeImage}
-                    onChangeDirector={this.onChangeDirector}
-                    onChangeYear={this.onChangeYear}
-                    onChangeStars={this.onChangeStars}
-                    onChangeLength={this.onChangeLength}
-                    onChangeMPAA={this.onChangeMPAA}
+                  <Form
+                    onHandleInput={this.onHandleInput}
                     onHandleSubmit={this.onHandleSubmit}
+                    {...this.state}
+                    {...props}
                   />
                 }
           />
-            {/* <span class="fa fa-star"></span>
-            <span class="fa fa-star-o"></span>
-            <span class="fa fa-star-half-o"></span> */} 
             </section>
           </div>
         </div>
