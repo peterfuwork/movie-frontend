@@ -1,5 +1,6 @@
 import React from 'react';
 import Back from "./Back";
+import ScrollToTopOnMount from './ScrollToTopOnMount';
 
 const Single = (props) => {
     if(props.movies.length === 0) {
@@ -9,13 +10,14 @@ const Single = (props) => {
             </div>
         );
     }
-    const movie = props.movies.filter(movie => movie.m_id === props.match.params.id);
+    const movie = props.movies.filter(movie => movie.m_id === Number(props.match.params.id));
     return (
         <div className="movie">
+            <ScrollToTopOnMount />
             <Back />
             <div className="col-xs-12 col-sm-7">
                 <div className="img-wrapper">
-                    <img className="img single" src={ movie[0].image} />
+                    <img className="img single" src={ movie[0].image} alt={movie[0].name} />
                 </div>
             </div>
             <div className="col-xs-12 col-sm-5 update">
@@ -109,7 +111,6 @@ const Single = (props) => {
                 <div className={`edit-hidden ${props.isEditButtonClick === true ? "" : "active"}`}>
                     
                     <div className="edit">
-                    {/* m_id, name, desc, type, image, director, year, stars, length_min, MPAA */}
                         <a 
                             href="#" 
                             className="edit-btn"
@@ -142,6 +143,7 @@ const Single = (props) => {
                     </div>
                 </div>
             </div>
+            {/* <input onKeyPress={(e) => props.onClickTest(e)} onClick={(e) => props.onClickTest(e)} /> */}
         </div>
     );
 }

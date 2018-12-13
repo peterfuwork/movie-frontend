@@ -172,7 +172,7 @@ class App extends Component {
 
   onClickEdit = (e, m_id, name, desc, type, image, director, year, stars, length_min, MPAA) => {
     e.preventDefault();
-    
+
     this.setState({
       isEditButtonClick: true,
       editMovieId: m_id,
@@ -257,50 +257,64 @@ class App extends Component {
       }
   }
 
+  // onClickTest = async (e) => {
+  //   const type = e.target.value;
+  //   const stars = 4;
+    
+  //   if (e.key === 'Enter') {
+  //   const data = await fetch(`http://localhost:4000/movies/test/?type=${type}&stars=${stars}`)
+  //   .then(data => data.json())
+  //     console.log(data)
+  //   }
+
+  // }
+
+
   render() {
     return (
       <BrowserRouter>
         <div className="App">
           <div className="container">
             <section className="row movies">
-          <Route  
-              exact 
-              path="/" 
-              render={(props) => 
-                <Category
-                  movies={this.state.movies}
-                  onHandleClickPage={this.onHandleClickPage}
-                  onClickDelete={this.onClickDelete}
-                  {...this.state} /> 
-              }
-          />
-          <Route
-                exact
-                path="/movies/id/:id"
-                render={(props) =>
-                  <Single
-                    movies={this.state.movies}
-                    handleAccordionClick={this.handleAccordionClick}
-                    onClickEdit={this.onClickEdit}
-                    onClickSave={this.onClickSave}
-                    onHandleClick={this.onHandleClick}
-                    onHandleInput={this.onHandleInput}
-                    {...this.state}
-                    {...props} />
-                }
-            />
-          <Route 
-                exact 
-                path="/form"
-                render={(props) => 
-                  <Form
-                    onHandleInput={this.onHandleInput}
-                    onHandleSubmit={this.onHandleSubmit}
-                    {...this.state}
-                    {...props}
-                  />
-                }
-          />
+              <Route  
+                  exact 
+                  path="/" 
+                  render={(props) => 
+                    <Category
+                      movies={this.state.movies}
+                      onHandleClickPage={this.onHandleClickPage}
+                      onClickDelete={this.onClickDelete}
+                      {...this.state} /> 
+                  }
+              />
+              <Route
+                    exact
+                    path="/movies/id/:id"
+                    render={(props) =>
+                      <Single
+                        movies={this.state.movies}
+                        handleAccordionClick={this.handleAccordionClick}
+                        onClickEdit={this.onClickEdit}
+                        onClickSave={this.onClickSave}
+                        onHandleClick={this.onHandleClick}
+                        onHandleInput={this.onHandleInput}
+                        onClickTest={this.onClickTest}
+                        {...this.state}
+                        {...props} />
+                    }
+                />
+              <Route 
+                    exact 
+                    path="/form"
+                    render={(props) => 
+                      <Form
+                        onHandleInput={this.onHandleInput}
+                        onHandleSubmit={this.onHandleSubmit}
+                        {...this.state}
+                        {...props}
+                      />
+                    }
+              />
             </section>
           </div>
         </div>

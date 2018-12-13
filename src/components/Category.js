@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from "react-router-dom";
+import ScrollToTopOnMount from './ScrollToTopOnMount';
 import Card from './Card';
 
 
@@ -47,6 +48,7 @@ class Category extends Component {
     });
     return (
       <div className="Category">
+        <ScrollToTopOnMount />
         <div className="col-sm-12 links">
           <Link className="link" to="/form">Add a new movie</Link>
         </div>
