@@ -33,26 +33,79 @@ class App extends Component {
       isEditButtonClick: false,
 
       currentPage: 1,
-      moviePerPage: 9,
+      moviePerPage: 6,
+      totalPages: null,
+      scrolling: false,
       accordions: {}
     }
   }
   async componentDidMount() {
-    const data = await fetch('http://localhost:4000/movies/')
-    .then(data => data.json());
-
+    // https://fierce-dawn-79367.herokuapp.com/movies
+    const { currentPage, moviePerPage, movies } = this.state;
+    const data = await fetch(`http://localhost:4000/movies/find?per=${moviePerPage}&page=${currentPage}`)
+    .then(data => data.json())
     this.setState({
-      movies: data.movies
+      movies: data.currentMovie
     })
+    
+    // window.addEventListener('scroll', this.handleScroll);
   }
 
   componentWillMount() {
+    this.loadMovies();
     document.addEventListener('mousedown', this.onHandleClickOffTarget, false);
+    document.addEventListener('scroll', this.handleScroll)
+  }
+
+  handleScroll = () => {
+    const { scrolling, totalPages, currentPage } = this.state;
+    if (scrolling) { return }
+    if(totalPages <= currentPage) { return }
+    const lastElement = document.querySelector('.links.load-more');
+    if(lastElement !== null) {
+      const lastElementOffset = lastElement.offsetTop + lastElement.clientHeight;
+      const pageOffset = window.pageYOffset + window.innerHeight;
+      let bottomOffset = 30;
+      if(pageOffset > lastElementOffset - bottomOffset) {
+        this.loadMore();
+      }
+    }
   }
 
   componentWillUnmount() {
     document.removeEventListener('mousedown', this.onHandleClickOffTarget, false);
+    document.removeEventListener('scroll', this.handleScroll)
   }
+
+  loadMovies = () => {
+    const { currentPage, moviePerPage, movies } = this.state;
+    const url = `http://localhost:4000/movies/find?per=${moviePerPage}&page=${currentPage}`;
+    fetch(url)
+      .then(res => {
+        return res.json();
+      })
+      .then(json => this.setState({
+        movies: [...movies, ...json.currentMovie],
+        scrolling: false,
+        totalPages: json.total_pages
+      }));
+  }
+
+  loadMore = () => {
+    this.setState(prevState => ({
+      currentPage: prevState.currentPage + 1,
+      scrolling: true,
+    }), this.loadMovies);
+  }
+
+  // handleScroll = () => {
+  //   if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+  //     console.log(this.state.currentPage);
+  //     this.setState({
+  //       currentPage: Number(this.state.currentPage) + 1
+  //     });
+  //   }
+  // }
 
 
   post = async (name, desc, type, image, director, year, stars, length, MPAA) => {
@@ -67,7 +120,7 @@ class App extends Component {
       length,
       MPAA
     };
-    await fetch('http://localhost:4000/moviePOST/', {
+    await fetch('http://localhost:4000/movies/moviePOST/', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -76,10 +129,16 @@ class App extends Component {
     })
     .then((response) => response.json())
     .then((response) => {
-      console.log('response',response);
-      this.setState({
-        movies: [...this.state.movies, ...response]
-      })
+      console.log(response);
+      if(this.state.totalPages === this.state.currentPage) {
+        this.setState({
+          movies: [
+            ...this.state.movies, response.movie[0]
+          ]
+        })
+      } else {
+        console.log('success')
+      }
     })
   }
 
@@ -87,7 +146,7 @@ class App extends Component {
     var newBody = {
       m_id: id
     };
-    await fetch('http://localhost:4000/movieDELETE', {
+    await fetch('http://localhost:4000/movies/movieDELETE', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -127,7 +186,7 @@ class App extends Component {
       length_min,
       MPAA
     };
-    await fetch('http://localhost:4000/moviePUT/', {
+    await fetch('http://localhost:4000/movies/moviePUT/', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -135,13 +194,15 @@ class App extends Component {
       body: JSON.stringify(newBody)
     })
     .then(response => {
+      console.log(response)
       return response.json();
     })
     .then((response) => {
-      console.log('response',response)
+      
       const i = this.state.movies.findIndex((movie) => {
         return movie.m_id === response[0].m_id;
       })
+      console.log('i',i)
       this.setState({
           movies: [
             ...this.state.movies.slice(0, i),
@@ -160,6 +221,7 @@ class App extends Component {
   }
 
   onHandleClickPage = (e) => {
+    window.scrollTo(0, 0);
     this.setState({
         currentPage: Number(e.target.id)
     });
@@ -257,18 +319,6 @@ class App extends Component {
       }
   }
 
-  // onClickTest = async (e) => {
-  //   const type = e.target.value;
-  //   const stars = 4;
-    
-  //   if (e.key === 'Enter') {
-  //   const data = await fetch(`http://localhost:4000/movies/test/?type=${type}&stars=${stars}`)
-  //   .then(data => data.json())
-  //     console.log(data)
-  //   }
-
-  // }
-
 
   render() {
     return (
@@ -281,9 +331,9 @@ class App extends Component {
                   path="/" 
                   render={(props) => 
                     <Category
-                      movies={this.state.movies}
                       onHandleClickPage={this.onHandleClickPage}
                       onClickDelete={this.onClickDelete}
+                      loadMore={this.loadMore}
                       {...this.state} /> 
                   }
               />
@@ -292,7 +342,6 @@ class App extends Component {
                     path="/movies/id/:id"
                     render={(props) =>
                       <Single
-                        movies={this.state.movies}
                         handleAccordionClick={this.handleAccordionClick}
                         onClickEdit={this.onClickEdit}
                         onClickSave={this.onClickSave}
