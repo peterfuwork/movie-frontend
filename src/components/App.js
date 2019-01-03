@@ -40,9 +40,10 @@ class App extends Component {
     }
   }
   async componentDidMount() {
-    // https://fierce-dawn-79367.herokuapp.com/movies
+    //front-end http://galvanize-g102-chiaen-fu-movies.surge.sh/
+    //back-end https://fierce-dawn-79367.herokuapp.com/movies
     const { currentPage, moviePerPage, movies } = this.state;
-    const data = await fetch(`http://localhost:4000/movies/find?per=${moviePerPage}&page=${currentPage}`)
+    const data = await fetch(`https://fierce-dawn-79367.herokuapp.com/movies/find?per=${moviePerPage}&page=${currentPage}`)
     .then(data => data.json())
     this.setState({
       movies: data.currentMovie
@@ -79,7 +80,7 @@ class App extends Component {
 
   loadMovies = () => {
     const { currentPage, moviePerPage, movies } = this.state;
-    const url = `http://localhost:4000/movies/find?per=${moviePerPage}&page=${currentPage}`;
+    const url = `https://fierce-dawn-79367.herokuapp.com/movies/find?per=${moviePerPage}&page=${currentPage}`;
     fetch(url)
       .then(res => {
         return res.json();
@@ -120,7 +121,7 @@ class App extends Component {
       length,
       MPAA
     };
-    await fetch('http://localhost:4000/movies/moviePOST/', {
+    await fetch('https://fierce-dawn-79367.herokuapp.com/movies/moviePOST/', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -146,7 +147,7 @@ class App extends Component {
     var newBody = {
       m_id: id
     };
-    await fetch('http://localhost:4000/movies/movieDELETE', {
+    await fetch('https://fierce-dawn-79367.herokuapp.com/movies/movieDELETE/', {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -186,7 +187,7 @@ class App extends Component {
       length_min,
       MPAA
     };
-    await fetch('http://localhost:4000/movies/moviePUT/', {
+    await fetch('https://fierce-dawn-79367.herokuapp.com/movies/moviePUT/', {
       headers: {
         'Content-Type': 'application/json'
       },

@@ -28,7 +28,7 @@ class Category extends Component {
           <Link className="link" to="/form">Add a new movie</Link>
         </div>
         { renderMovies }
-        <div className="col-sm-12 links load-more">
+        <div className="col-xs-12 links load-more">
             { this.props.totalPages === this.props.currentPage ? "" : <img src={loading} className="loading" alt="loading" />}
         </div>
       </div>
